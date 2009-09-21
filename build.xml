@@ -1,0 +1,32 @@
+<project name="crashreportserver" default="war" basedir=".">
+    <property name="web.classes.dir" value="src/main/webapp/WEB-INF/classes"/>
+    <property name="web.lib.dir" value="src/main/webapp/WEB-INF/lib"/>
+
+    <target name="clean">
+        <delete dir="dist"/>
+        <delete dir="${web.classes.dir}"/>
+    </target>
+
+    <target name="web.classes">
+        <mkdir dir="${web.lib.dir}"/>
+        <mkdir dir="${web.classes.dir}"/>
+        <javac debug="true" debuglevel="lines,vars,source"
+                destdir="${web.classes.dir}"
+                classpath="lib/javax.servlet.jar:src/main/webapp/WEB-INF/lib/log4j-1.2.14.jar:src/main/webapp/WEB-INF/lib/commons-fileupload-1.2.1.jar">
+            <src path="src/main/java"/>
+        </javac>
+        <antcall target="copy.log4jproperties"/>
+    </target>
+    <target name="copy.log4jproperties">
+        <copy todir="${web.classes.dir}">
+            <fileset dir="src/main" includes="log4j/**/*"/>
+        </copy>
+    </target>
+    <target name="war" depends="web.classes">
+        <mkdir dir="dist"/>
+        <jar destfile="dist/crashreportserver.war">
+            <fileset dir="src/main/webapp"/>
+        </jar>
+    </target>
+</project>
+
