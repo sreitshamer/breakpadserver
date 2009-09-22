@@ -68,7 +68,9 @@ public class CRSRequestProcessor {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
     void postNewCR(String appName) throws ServletException, IOException {
+        logger.debug("postNewCR");
         if (!ServletFileUpload.isMultipartContent(request)) {
+            logger.debug("not multipart!");
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -77,6 +79,7 @@ public class CRSRequestProcessor {
         upload.setSizeMax(100*1024*1024);
         String uuid = UUID.randomUUID().toString();
         File dir = new File("/tmp/crashreports/" + appName + "/" + uuid);
+        logger.debug("making path " + dir.getPath());
         dir.mkdirs();
         try {
             List<?> items = upload.parseRequest(request);
@@ -101,6 +104,8 @@ public class CRSRequestProcessor {
     }
     private void writeString(String string, File itemDir, String fileName) throws IOException {
         File dataFile = new File(itemDir, fileName);
+        dataFile.getParentFile().mkdirs();
+        logger.debug("writing string '" + string + " to " + dataFile.getPath());
         FileOutputStream fos = new FileOutputStream(dataFile);
         fos.write(string.getBytes("ASCII"));
         fos.flush();
