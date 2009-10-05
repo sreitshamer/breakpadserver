@@ -11,6 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 public class CRSServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException {
-        new CRSRequestProcessor(arg0, arg1).service();
+        new CRSRequestProcessor(this, arg0, arg1).service();
     }
 }

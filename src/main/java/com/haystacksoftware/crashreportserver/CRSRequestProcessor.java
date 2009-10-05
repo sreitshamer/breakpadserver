@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,12 +25,14 @@ public class CRSRequestProcessor {
     private static final Logger logger = Logger.getLogger(CRSRequestProcessor.class);
     private static final Pattern NEW_CR = Pattern.compile("^/([^/]+)/new");
     private Set<Transaction> transactions = new HashSet<Transaction>();
+    private CRSServlet servlet;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private String uri;
     private String mainURI;
     
-    public CRSRequestProcessor(HttpServletRequest arg0, HttpServletResponse arg1) {
+    public CRSRequestProcessor(CRSServlet theServlet, HttpServletRequest arg0, HttpServletResponse arg1) {
+        servlet = theServlet;
         request = arg0;
         response = arg1;
         uri = request.getRequestURI();
@@ -76,38 +79,40 @@ public class CRSRequestProcessor {
         }
         DiskFileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setSizeMax(100*1024*1024);
+        upload.setSizeMax(10*1024*1024);
         String uuid = UUID.randomUUID().toString();
-        File dir = new File("/tmp/crashreports/" + appName + "/" + uuid);
-        logger.debug("making path " + dir.getPath());
-        dir.mkdirs();
+        ServletContext sc = servlet.getServletContext();
+        CrashReport cr = new CrashReport(appName, uuid);
+        File dir = new File(sc.getInitParameter("crash.reports.dir") + appName + "/" + uuid);
         try {
             List<?> items = upload.parseRequest(request);
             Iterator<?> iter = items.iterator();
             while (iter.hasNext()) {
                 FileItem item = (FileItem)iter.next();
-                File itemDir = new File(dir, item.getFieldName());
                 if (item.isFormField()) {
-                    writeString(item.getString(), itemDir, "string");
+                    File dataFile = new File(dir, item.getFieldName());
+                    cr.setValue(item.getFieldName(), item.getString());
+                    writeStringToFile(item.getString(), dataFile);
                 } else {
-                    writeString(item.getFieldName(), itemDir, "fieldName");
-                    writeString(item.getName(), itemDir, "name");
-                    writeString(item.getContentType(), itemDir, "contentType");
-                    writeString(new Long(item.getSize()).toString(), itemDir, "size");
-                    File dataFile = new File(itemDir, "data");
+                    File dataFile = new File(dir, item.getName());
+                    dataFile.getParentFile().mkdirs();
                     item.write(dataFile);
+                    cr.setValue(item.getName(), dataFile);
                 }
             }
+            cr.setValue("remoteipaddr", request.getRemoteAddr());
+            File ipAddr = new File(dir, "remoteipaddr");
+            writeStringToFile(request.getRemoteAddr(), ipAddr);
         } catch(Exception e) {
             throw new IOException(e);
         }
+        cr.sendEmail(sc);
     }
-    private void writeString(String string, File itemDir, String fileName) throws IOException {
-        File dataFile = new File(itemDir, fileName);
-        dataFile.getParentFile().mkdirs();
-        logger.debug("writing string '" + string + " to " + dataFile.getPath());
-        FileOutputStream fos = new FileOutputStream(dataFile);
-        fos.write(string.getBytes("ASCII"));
+    private void writeStringToFile(String str, File file) throws IOException {
+        file.getParentFile().mkdirs();
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(str.getBytes("UTF-8"));
+        fos.write("\n".getBytes("UTF-8"));
         fos.flush();
         fos.close();
     }

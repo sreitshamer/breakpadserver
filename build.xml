@@ -12,7 +12,7 @@
         <mkdir dir="${web.classes.dir}"/>
         <javac debug="true" debuglevel="lines,vars,source"
                 destdir="${web.classes.dir}"
-                classpath="lib/javax.servlet.jar:src/main/webapp/WEB-INF/lib/log4j-1.2.14.jar:src/main/webapp/WEB-INF/lib/commons-fileupload-1.2.1.jar">
+                classpath="lib/javax.servlet.jar:src/main/webapp/WEB-INF/lib/log4j-1.2.14.jar:src/main/webapp/WEB-INF/lib/mail.jar:src/main/webapp/WEB-INF/lib/commons-fileupload-1.2.1.jar:src/main/webapp/WEB-INF/lib/activation.jar">
             <src path="src/main/java"/>
         </javac>
         <antcall target="copy.log4jproperties"/>
