@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -43,7 +42,7 @@ public class CrashReport {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress("crashreport@haystacksoftware.com"));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(sc.getInitParameter("mail.recipient")));
-            message.setSubject("crash report");
+            message.setSubject(appName + " crash report");
             
             Multipart multipart = new MimeMultipart();
             
@@ -55,9 +54,8 @@ public class CrashReport {
                 if (value instanceof File) {
                     File file = (File)value;
                     MimeBodyPart filePart = new MimeBodyPart();
-                    DataSource source = new FileDataSource(file.getPath());
-                    filePart.setDataHandler(new DataHandler(source));
-                    filePart.setFileName(file.getPath());
+                    filePart.setDataHandler(new DataHandler(new FileDataSource(file.getPath())));
+                    filePart.setFileName(file.getName());
                     multipart.addBodyPart(filePart);
                 } else {
                     text.append(key + ": " + value + "\n");
