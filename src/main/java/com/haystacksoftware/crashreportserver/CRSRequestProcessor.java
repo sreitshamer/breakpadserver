@@ -83,21 +83,26 @@ public class CRSRequestProcessor {
         String uuid = UUID.randomUUID().toString();
         ServletContext sc = servlet.getServletContext();
         CrashReport cr = new CrashReport(appName, uuid);
-        File dir = new File(sc.getInitParameter("crash.reports.dir") + appName + "/" + uuid);
+        File dir = new File(sc.getInitParameter("crash.reports.dir") + "/" + appName + "/" + uuid);
         try {
             List<?> items = upload.parseRequest(request);
             Iterator<?> iter = items.iterator();
             while (iter.hasNext()) {
                 FileItem item = (FileItem)iter.next();
+                logger.debug("got item: name=" + item.getName() + ", fieldName=" + item.getFieldName() + ", isFormField=" + (item.isFormField() ? "YES" : "NO"));
                 if (item.isFormField()) {
                     File dataFile = new File(dir, item.getFieldName());
                     cr.setValue(item.getFieldName(), item.getString());
                     writeStringToFile(item.getString(), dataFile);
                 } else {
-                    File dataFile = new File(dir, item.getName());
+                    String fileName = item.getFieldName();
+                    if (fileName.equals("log")) {
+                        fileName = "log.tar.bz2";
+                    }
+                    File dataFile = new File(dir, fileName);
                     dataFile.getParentFile().mkdirs();
                     item.write(dataFile);
-                    cr.setValue(item.getName(), dataFile);
+                    cr.setValue(fileName, dataFile);
                 }
             }
             cr.setValue("remoteipaddr", request.getRemoteAddr());
