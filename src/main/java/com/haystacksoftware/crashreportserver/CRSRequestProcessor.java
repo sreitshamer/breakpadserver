@@ -97,7 +97,7 @@ public class CRSRequestProcessor {
                 } else {
                     String fileName = item.getFieldName();
                     if (fileName.equals("log")) {
-                        fileName = "log.tar.bz2";
+                        fileName = "log.tar.bz2"; // More convenient filename -- allows double-clicking of the file in the email.
                     }
                     File dataFile = new File(dir, fileName);
                     dataFile.getParentFile().mkdirs();
