@@ -1,7 +1,7 @@
 Breakpad Server
 ---------------
 
-a Java web application for receiving Breakpad crash reports
+a Java web application for receiving crash reports from Breakpad <http://google-breakpad.googlecode.com>
 
 
 Installation
@@ -27,4 +27,28 @@ On my gentoo host in `/etc/tomcat-6/Catalina/crashreport.haystacksoftware.com` I
         <Parameter name="mail.smtp.host" value="mail.reitshamer.com" override="false"/>
         <Parameter name="crash.reports.dir" value="/tmp/crashreports" override="false"/>
     </Context>
+
+Generating Crash Reports
+------------------------
+See <http://www.reitshamer.com/?p=18> for tips on integrating Breakpad into an OS X application.
+
+When the application crashes, it'll send a "minidump" file to your
+crashreportserver. If you've specified `BreakpadLogFileTailSize` in your app's
+Info.plist, it'll also send a log file (in a separate HTTP request) to your
+crashreportserver.
+
+The crashreportserver will send you an email message with the minidump file
+attached. If you've specified `BreakpadLogFileTailSize` it'll send a separate
+email with the log file snippet.
+
+
+Processing Crash Reports
+------------------------
+
+First, build Breakpad's `crash_report` utility -- the Xcode project is in google-breakpad/src/tools/mac.
+
+Once you receive a minidump file, use `crash_report` to read it:
+
+    crash_report upload_file_minidump 
+
 
