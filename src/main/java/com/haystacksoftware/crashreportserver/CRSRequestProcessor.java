@@ -52,6 +52,8 @@ public class CRSRequestProcessor {
             }
         });
     }
+    // Overly complicated request routing mechanism copied/pasted from another larger project.
+    // Reluctant to delete it because it works.
     public void service() throws ServletException, IOException {
         for (Transaction txn : transactions) {
             Matcher m = txn.getPattern().matcher(uri);
