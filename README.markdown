@@ -19,12 +19,14 @@ Installation
 Configuration Example
 ---------------------
 
-On my gentoo host in `/etc/tomcat-6/Catalina/crashreport.haystacksoftware.com` I created a file ROOT.xml containing:
+If you're running Tomcat on gentoo and your web app's hostname is
+`crashreport.mycompany.com`, create a file
+`/etc/tomcat-6/Catalina/crashreport.mycompany.com/ROOT.xml`:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <Context docBase="/home/tomcat/production/crashreportserver.war">
-        <Parameter name="mail.recipient" value="stefan@haystacksoftware.com" override="false"/>
-        <Parameter name="mail.smtp.host" value="mail.reitshamer.com" override="false"/>
+        <Parameter name="mail.recipient" value="crashreports@mycompany.com" override="false"/>
+        <Parameter name="mail.smtp.host" value="mail.mycompany.com" override="false"/>
         <Parameter name="crash.reports.dir" value="/tmp/crashreports" override="false"/>
     </Context>
 
